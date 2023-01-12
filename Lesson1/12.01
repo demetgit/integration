@@ -1,0 +1,106 @@
+//Salesforce'daki Metodu Baska Bir Salesforce Org'dan Cagirma
+//Diger Org'a gidelim ve class olusturalim
+
+public class ContactRequest {
+	
+    public static void getContact(){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://serdi4-dev-ed.develop.my.salesforce.com/services/apexrest/ContactProvider/?contactId=0038d00000MKdP3AAL');
+        request.setMethod('GET');
+        request.setHeader('Authorization', 'Bearer 00D8d000008Cgfm!AQ0AQHmJ57yh6SRZvIT8EGlodnXgq9uLLw.U3m.JGtGhmFtsrGHumKIwtts.RuCLdilZMooJxl1dpyOJxaEB90T5.8VbIvJe');
+        
+        HttpResponse response = http.send(request);
+        
+        if(response.getStatusCode()==200){
+            Contact con = (Contact) JSON.deserialize(response.getBody(),Contact.class);
+            System.debug(con);
+        }else{
+            System.debug('Beklenmeyen bir hata olustu: ' + response.getStatusCode() + '--' + response.getStatus());
+        }  //ContactRequest.getContact();ile calistir. Postman 6.uygulamadaki her seyi 2.org'da class'ta yaptik.
+    }
+}
+
+//------------------------
+
+//Postman'den Salesforce'a Data Eklemek (POST Method)
+
+//Salesforce'da POST istegini kabul edecek bir class olusturalim. 
+
+@RestResource (UrlMapping='/ContactProvider/') //1-ContactProvider variable ismidir ve karsi tarafa verilmelidir
+global class ContactRestService { //2-public'i global'e cevirdik
+    
+    //3-Get istegine cevap verecek method'u olusturalim
+    @HttpGet
+    global static Contact getContact(){
+        RestRequest request = RestContext.request; //4-sag taraf olan dis istegi yerel bir variable'a atadik
+        
+        String conId =request.params.get('contactId');
+        //6-request'in icinden,karsinin gonderdigi contactId parametresi ile, istenilen Contact'in Id'sine ulastik
+        Contact con = [SELECT Id,Name,Email,Phone FROM Contact WHERE Id =: conId LIMIT 1];
+        return con;
+    }
+    
+    //--------------------------POST
+    //Dis sistemden gonderilecek veri oldugu icin, bu methot'ta parametre vardir
+    
+    @HttpPost
+    global static Contact postContact(Contact request){
+        Contact con = new Contact();
+        con.FirstName = request.FirstName;
+        con.LastName = request.LastName;
+        con.Email = request.Email;
+        con.Phone = request.Phone;
+        insert con;
+        return con; //insert isleminden sonra,karsi sisteme islem basarili diye bilgi gonderir
+    }
+}
+//POST istegini, Postman 7.postSalesforceContact'dan yaptik
+
+//------------------------------------------
+
+//Salesforce'dan(2.org) Salesforce'a(1.org) Data Eklemek
+
+public class ContactRequest {
+	
+    //-----------------------------GET
+    public static void getContact(){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://serdi4-dev-ed.develop.my.salesforce.com/services/apexrest/ContactProvider/?contactId=0038d00000MKdP3AAL');
+        request.setMethod('GET');
+        request.setHeader('Authorization', 'Bearer 00D8d000008Cgfm!AQ0AQHmJ57yh6SRZvIT8EGlodnXgq9uLLw.U3m.JGtGhmFtsrGHumKIwtts.RuCLdilZMooJxl1dpyOJxaEB90T5.8VbIvJe');
+        
+        HttpResponse response = http.send(request);
+        
+        if(response.getStatusCode()==200){
+            Contact con = (Contact) JSON.deserialize(response.getBody(),Contact.class);
+            System.debug(con);
+        }else{
+            System.debug('Beklenmeyen bir hata olustu: ' + response.getStatusCode() + '--' + response.getStatus());
+        }  //ContactRequest.getContact();ile calistir. Postman 6.uygulamadaki her seyi 2.org'da class'ta yaptik.
+    }
+    
+    //-----------------------------POST
+    
+    public static void postContact(){
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://serdi4-dev-ed.develop.my.salesforce.com/services/apexrest/ContactProvider/');
+        request.setMethod('POST');
+        request.setHeader('Authorization', 'Bearer 00D8d000008Cgfm!AQ0AQHmJ57yh6SRZvIT8EGlodnXgq9uLLw.U3m.JGtGhmFtsrGHumKIwtts.RuCLdilZMooJxl1dpyOJxaEB90T5.8VbIvJe');
+        request.setHeader('Content-Type','application/json;charset=UTF-8');
+        
+        request.setBody('{"request":{"FirstName":"Ali","LastName":"Canan","Email":"alicanan45@gmail.com","Phone":"12345678"}}');
+        
+        HttpResponse response = http.send(request);
+        
+        if(response.getStatusCode()==200){ //normalde 201'dir
+            Contact con = (Contact) JSON.deserialize(response.getBody(),Contact.class);
+            System.debug(con);
+        }else{
+            System.debug('Beklenmeyen bir hata olustu: ' + response.getStatusCode() + '--' + response.getStatus());
+        }  //ContactRequest.getContact();ile calistir. Postman 6.uygulamadaki her seyi 2.org'da class'ta yaptik.
+    }
+} //ContactRequest.postContact(); ile calistir.
+
