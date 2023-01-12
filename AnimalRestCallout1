@@ -1,0 +1,54 @@
+public class AnimalRestCallout {
+//ornek 1: https://th-apex-http-callout.herokuapp.com/animals ’a yeni data POST ediniz.
+    public static void getAnimals (){
+        //postman de sıralama 1-new 2-http request 3-endpointlinki 4-methodu sec (GET buyuk yazlmzsa calsmaz) 5-Send
+        
+        Http http = new Http();  //1-new
+        HttpRequest request = new HttpRequest(); //2
+        request.setEndpoint('https://th-apex-http-callout.herokuapp.com/animals'); //3
+        request.setMethod('GET'); //4- GET buyuk harfle yazlmaldr
+        HttpResponse response = http.send(request); //5 (en bastaki http ve request yerine ne yazarsanz o cıkar burda) send e baslnca gelen cevap response a yuklendi
+        
+        if(response.getStatusCode()==200){ //esitse data sıkıntsz gelmstr
+            //gelen datayi ayristrma (parse etme) de 2 yontem vardr.
+            //1.yol : Parse islemi requesti yapan class içinde yaplr.
+            //response.getBody() Json string yapısındadr
+            
+            //Map<String,Object> results = ( Map<String,Object>) JSON.deserializeUntyped(response.getBody());
+            //( Map<String,Object>) casting kalıba dokmek islemidir
+            
+            //List<Object> animals = (List<Object>) results.get('animals'); //animals key ini verelm get e , value leri getrsn
+       
+            //for(Object w: animals){
+               // System.debug(w);
+            }
+        //2.yol: parse islemi icin ayri bir class olusturulur.
+        //https://json2apex.herokuapp.com bu site otomatk parse için kodları veriyor
+        ////dger classmzdan bir obje (instance) olusturacagz.
+        Restanimalparse rap= Restanimalparse.parse(response.getBody());
+         for(Object w: rap.animals){
+                System.debug(w);
+            }
+        
+        }
+    
+ //POST işlemi için yeni bir method olusturalm.
+ 
+     public static void postAnimals(){
+         
+         Http http= new Http();
+         HttpRequest request= new HttpRequest();
+         request.setEndpoint('https://th-apex-http-callout.herokuapp.com/animals');
+         request.setMethod('POST');
+         request.setHeader('Content-Type','application/json;charset=UTF-8'); //yeni bilgi 1
+         request.setBody('{"name":"civciv"}'); //yeni bilgi:gonderilecek JSON objecti setBody ile yazilir
+         
+         HttpResponse response= http.send(request);
+         
+         if(response.getStatusCode()==201){
+             System.debug(response.getBody());
+         }else{
+             System.debug('Beklenmeyen durum kodu geldi:' + response.getStatusCode()+ ' ' + response.getStatus());
+         }
+     }
+    
