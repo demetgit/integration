@@ -1,0 +1,56 @@
+//Dis Sisteme Data Gondermek:
+
+//ornek 2: https://gorest.co.in/public/v2/users/ 'da yeni bir user olusturunuz.
+
+public class PostUser {
+    
+	//Dis Sisteme Data Gondermek:
+	//ornek 2: https://gorest.co.in/public/v2/users/ 'da yeni bir user olusturunuz.
+	
+    public static void postGorest(){
+        
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        request.setEndpoint('https://gorest.co.in/public/v2/users/');
+        request.setMethod('POST');
+        request.setHeader('Authorization', 'Bearer cc393ab1712be10607a2ce01e9cc1c92d3e3751ee41fdddb6d57bc17bb3d8906');
+        request.setHeader('Content-Type','application/json;charset=UTF-8');
+        
+        request.setBody('{"name":"Serkan5","email":"serdi345@gmail.com","gender":"male","status":"active"}');
+        
+        HttpResponse response = http.send(request);
+        
+        if(response.getStatusCode()==201){
+            System.debug('Result: ' + response.getBody());
+            
+        }else{
+            System.debug('Hata: ' + response.getStatusCode() + ' ' + response.getStatus());
+        } 
+    }   
+}
+//--------------calistirilmasi
+PostUser.postGorest();
+
+//-------------------
+//Salesforce'da Data Cekmek (GET)
+
+//Ornek 1: Dis sistem Contact Id'si ile Contact'a ait verilerin sorgulanmasini saglayan yapiyi olusturunuz.
+
+@RestResource (UrlMapping='/ContactProvider/') //1-ContactProvider variable ismidir ve karsi tarafa verilmelidir
+global class ContactRestService { //2-public'i global'e cevirdik
+    
+    //3-Get istegine cevap verecek meyhod'u olusturalim
+    @HttpGet
+    global static Contact getContact(){
+        RestRequest request = RestContext.request; //4-sag taraf olan dis istegi yerel bir variable'a atadik
+        
+        String conId =request.params.get('contactId');
+        //6-request'in icinden,karsinin gonderdigi contactId parametresi ile, istenilen Contact'in Id'sine ulastik
+        Contact con = [SELECT Id,Name,Email,Phone FROM Contact WHERE Id =: conId LIMIT 1];
+        return con;
+    }
+}
+//---------------Calistirilmasi
+//Gerekli cagirma linki ve ayarlari Postman'de 6-getSalesforceContact icindedir.
+
+
