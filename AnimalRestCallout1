@@ -22,7 +22,7 @@ public class AnimalRestCallout {
             //for(Object w: animals){
                // System.debug(w);
             }
-        //2.yol: parse islemi icin ayri bir class olusturulur.
+        //2.yol: parse islemi icin ayri bir class olusturulur .json formatını salesforce diline ayrstrmak
         //https://json2apex.herokuapp.com bu site otomatk parse için kodları veriyor
         ////dger classmzdan bir obje (instance) olusturacagz.
         Restanimalparse rap= Restanimalparse.parse(response.getBody());
